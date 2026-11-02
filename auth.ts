@@ -1,19 +1,8 @@
-import NextAuth from 'next-auth';
-import { authConfig } from './auth.config';
-import Credentials from 'next-auth/providers/credentials';
-import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
-
-async function getUser(email: string) {
-  try {
-    const user = await prisma.user.findUnique({ where: { email } });
-    return user;
-  } catch (error) {
-    console.error('Failed to fetch user:', error);
-    throw new Error('Failed to fetch user.');
-  }
-}
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import { z } from "zod";
+import { authConfig } from "./auth.config";
+import { findUserByEmail, passwordMatches } from "@/lib/auth/credentials";
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
@@ -26,21 +15,14 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
-          const user = await getUser(email);
+          const user = await findUserByEmail(email);
           if (!user) return null;
-          
-          // Try bcrypt compare first if it looks like a hash
-          let passwordsMatch = false;
-          if (user.password.startsWith('$2')) {
-             passwordsMatch = await bcrypt.compare(password, user.password);
-          } else {
-             passwordsMatch = password === user.password;
-          }
 
+          const passwordsMatch = await passwordMatches(user.password, password);
           if (passwordsMatch) return user;
         }
-        
-        console.log('Invalid credentials');
+
+        console.log("Invalid credentials");
         return null;
       },
     }),

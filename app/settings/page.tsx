@@ -1,4 +1,5 @@
-import { getCurrentUser } from "@/app/actions/user";
+import { isAdminUser } from "@/lib/auth/admin";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileForm } from "@/components/settings/profile-form";
@@ -30,7 +31,7 @@ export default async function SettingsPage({
     redirect('/users');
   }
 
-  const isAdmin = user.email === 'mobowp027@gmail.com' || (user as any).role === 'ADMIN';
+  const isAdmin = isAdminUser(user);
   const defaultTab = typeof searchParams.tab === 'string' ? searchParams.tab : 'profile';
 
   return (

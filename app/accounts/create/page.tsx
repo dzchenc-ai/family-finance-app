@@ -1,18 +1,15 @@
 import { createAccount } from "@/app/actions/account";
-import { AccountForm } from "@/components/account-form";
+import { AccountForm } from "@/components/accounts/account-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { prisma } from "@/lib/prisma";
+import { listTopLevelAccounts } from "@/lib/domain/accounts";
 
 export default async function CreateAccountPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const accounts = await prisma.account.findMany({
-    where: { parentId: null } // Only top level accounts can be parents for now to avoid deep nesting complexity
-  });
-
-  const parentId = typeof searchParams.parentId === 'string' ? searchParams.parentId : undefined;
+  const accounts = await listTopLevelAccounts();
+  const parentId = typeof searchParams.parentId === "string" ? searchParams.parentId : undefined;
 
   return (
     <div className="flex justify-center p-8">
@@ -21,10 +18,10 @@ export default async function CreateAccountPage({
           <CardTitle>添加账户</CardTitle>
         </CardHeader>
         <CardContent>
-          <AccountForm 
-            action={createAccount} 
-            parentAccounts={accounts} 
-            defaultValues={parentId ? { parentId } as any : undefined}
+          <AccountForm
+            action={createAccount}
+            parentAccounts={accounts}
+            defaultValues={parentId ? ({ parentId } as any) : undefined}
           />
         </CardContent>
       </Card>

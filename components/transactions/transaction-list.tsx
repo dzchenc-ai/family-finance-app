@@ -6,7 +6,7 @@ import { ArrowDownLeft, ArrowUpRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TransactionActions } from "@/components/transaction-actions";
+import { TransactionActions } from "@/components/transactions/transaction-actions";
 import { PaginationControl } from "@/components/pagination-control";
 import { deleteTransactions } from "@/app/actions/transaction";
 import { useToast } from "@/hooks/use-toast";

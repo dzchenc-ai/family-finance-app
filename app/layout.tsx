@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/layout/navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
-import { AiChatWidget } from "@/components/ai-chat-widget";
+import { AiChatWidget } from "@/components/layout/ai-chat-widget";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// Every screen reads the signed-in household from the database. Do not prerender it.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "家庭理财管理系统",

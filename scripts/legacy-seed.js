@@ -1,3 +1,4 @@
+// Superseded by prisma/seed.ts (`npx prisma db seed`). Kept for reference only.
 const { PrismaClient } = require('@prisma/client')
 const bcrypt = require('bcryptjs')
 

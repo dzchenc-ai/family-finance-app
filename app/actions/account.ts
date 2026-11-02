@@ -1,180 +1,117 @@
-'use server';
+"use server";
 
-import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { getCurrentUser } from './user';
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import {
+  createAccountRecord,
+  createChildAccountRecord,
+  deleteAccountById,
+  updateAccountRecord,
+} from "@/lib/domain/accounts";
 
-export async function createAccount(formData: FormData) {
-  const name = formData.get('name') as string;
-  const type = formData.get('type') as string;
-  const balance = parseFloat(formData.get('balance') as string) || 0;
-  const currency = formData.get('currency') as string || 'CNY';
-  const parentId = formData.get('parentId') as string;
-  const icon = formData.get('icon') as string;
-
-  const user = await getCurrentUser();
-
-  if (!user) {
-    throw new Error('请先登录');
-  }
-
-  try {
-    await prisma.account.create({
-      data: {
-        name,
-        type,
-        balance,
-        currency,
-        userId: user.id,
-        parentId: parentId === 'none' ? null : parentId,
-        icon,
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create account:', error);
-    throw new Error('创建账户失败');
-  }
-
-  revalidatePath('/accounts');
-  revalidatePath('/wealth');
-  redirect('/wealth?tab=accounts');
+function readAccountFields(formData: FormData) {
+  const parentId = formData.get("parentId") as string;
+  return {
+    name: formData.get("name") as string,
+    type: formData.get("type") as string,
+    balance: parseFloat(formData.get("balance") as string) || 0,
+    currency: (formData.get("currency") as string) || "CNY",
+    parentId,
+    icon: formData.get("icon") as string,
+    userId: formData.get("userId") as string,
+  };
 }
 
-export async function updateAccount(id: string, formData: FormData) {
-  const name = formData.get('name') as string;
-  const type = formData.get('type') as string;
-  const balance = parseFloat(formData.get('balance') as string) || 0;
-  const currency = formData.get('currency') as string || 'CNY';
-  const parentId = formData.get('parentId') as string;
-  const icon = formData.get('icon') as string;
-  const userId = formData.get('userId') as string;
-
-  // 处理子账户更新
+function readChildUpdates(formData: FormData) {
   const rawFormData = Object.fromEntries(formData.entries());
-  const childUpdates: Record<string, any> = {};
+  const childUpdates: Record<string, Record<string, unknown>> = {};
 
   for (const [key, value] of Object.entries(rawFormData)) {
-    if (key.startsWith('child_')) {
-      const parts = key.split('_');
-      if (parts.length >= 3) {
-        const childId = parts[1];
-        const field = parts.slice(2).join('_');
-        
-        if (!childUpdates[childId]) {
-          childUpdates[childId] = {};
-        }
-        
-        if (field === 'balance') {
-             childUpdates[childId][field] = parseFloat(value as string) || 0;
-        } else {
-             childUpdates[childId][field] = value;
-        }
-      }
+    if (!key.startsWith("child_")) continue;
+    const parts = key.split("_");
+    if (parts.length < 3) continue;
+
+    const childId = parts[1];
+    const field = parts.slice(2).join("_");
+    if (!childUpdates[childId]) {
+      childUpdates[childId] = {};
+    }
+
+    if (field === "balance") {
+      childUpdates[childId][field] = parseFloat(value as string) || 0;
+    } else {
+      childUpdates[childId][field] = value;
     }
   }
 
-  try {
-    await prisma.$transaction(async (tx) => {
-      const updateData: any = {
-        name,
-        type,
-        balance,
-        currency,
-        parentId: parentId === 'none' ? null : parentId,
-        icon,
-      };
+  return childUpdates;
+}
 
-      const currentUser = await getCurrentUser();
-      if (currentUser?.role === 'ADMIN' && userId) {
-        updateData.userId = userId;
-      }
+export async function createAccount(formData: FormData) {
+  const fields = readAccountFields(formData);
+  const user = await getCurrentUser();
 
-      await tx.account.update({
-        where: { id },
-        data: updateData,
-      });
-
-      for (const [childId, data] of Object.entries(childUpdates)) {
-        await tx.account.update({
-          where: { id: childId },
-          data: data,
-        });
-      }
-    });
-  } catch (error) {
-    console.error('Failed to update account:', error);
-    throw new Error('更新账户失败');
+  if (!user) {
+    throw new Error("请先登录");
   }
 
-  revalidatePath('/accounts');
-  revalidatePath('/wealth');
-  redirect('/wealth?tab=accounts');
+  await createAccountRecord(user, {
+    ...fields,
+    parentId: fields.parentId === "none" ? null : fields.parentId,
+  });
+
+  revalidatePath("/accounts");
+  revalidatePath("/wealth");
+  redirect("/wealth?tab=accounts");
+}
+
+export async function updateAccount(id: string, formData: FormData) {
+  const fields = readAccountFields(formData);
+
+  await updateAccountRecord(
+    id,
+    {
+      ...fields,
+      parentId: fields.parentId === "none" ? null : fields.parentId,
+    },
+    readChildUpdates(formData),
+  );
+
+  revalidatePath("/accounts");
+  revalidatePath("/wealth");
+  redirect("/wealth?tab=accounts");
 }
 
 export async function deleteAccount(id: string) {
   try {
-    // Check if account has transactions
-    const transactionCount = await prisma.transaction.count({
-      where: { accountId: id }
-    });
-
-    if (transactionCount > 0) {
-      throw new Error('该账户下有交易记录，无法删除');
-    }
-
-    // Check if account has children
-    const childrenCount = await prisma.account.count({
-      where: { parentId: id }
-    });
-
-    if (childrenCount > 0) {
-        throw new Error('该账户下有子账户，无法删除');
-    }
-
-    await prisma.account.delete({
-      where: { id }
-    });
+    await deleteAccountById(id);
   } catch (error) {
-    console.error('Failed to delete account:', error);
+    console.error("Failed to delete account:", error);
     throw error;
   }
 
-  revalidatePath('/accounts');
-  revalidatePath('/wealth');
+  revalidatePath("/accounts");
+  revalidatePath("/wealth");
 }
 
 export async function createChildAccount(formData: FormData) {
-  const name = formData.get('name') as string;
-  const type = formData.get('type') as string;
-  const balance = parseFloat(formData.get('balance') as string) || 0;
-  const currency = formData.get('currency') as string || 'CNY';
-  const parentId = formData.get('parentId') as string;
-  const icon = formData.get('icon') as string;
-
+  const fields = readAccountFields(formData);
   const user = await getCurrentUser();
 
   if (!user) {
-    throw new Error('请先登录');
+    throw new Error("请先登录");
   }
 
-  try {
-    await prisma.account.create({
-      data: {
-        name,
-        type,
-        balance,
-        currency,
-        userId: user.id,
-        parentId: parentId,
-        icon,
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create child account:', error);
-    throw new Error('创建子账户失败');
-  }
+  await createChildAccountRecord(user, {
+    name: fields.name,
+    type: fields.type,
+    balance: fields.balance,
+    currency: fields.currency,
+    parentId: fields.parentId,
+    icon: fields.icon,
+  });
 
-  revalidatePath('/accounts');
-  revalidatePath('/wealth');
+  revalidatePath("/accounts");
+  revalidatePath("/wealth");
 }

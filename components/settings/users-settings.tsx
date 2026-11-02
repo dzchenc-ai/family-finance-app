@@ -1,13 +1,10 @@
-import { prisma } from "@/lib/prisma";
-import { CreateUserDialog } from "@/components/create-user-dialog";
+import { CreateUserDialog } from "@/components/users/create-user-dialog";
 import { UsersTable } from "@/components/settings/users-table";
-import { getCurrentUser } from "@/app/actions/user";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { listUsers } from "@/lib/domain/users";
 
 export async function UsersSettings() {
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
-  
+  const users = await listUsers();
   const currentUser = await getCurrentUser();
 
   return (

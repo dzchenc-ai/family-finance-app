@@ -12,8 +12,8 @@ import {
   Menu,
   Settings
 } from "lucide-react";
-import { Button } from "./ui/button";
-import { NavbarUser } from "./navbar-user";
+import { Button } from "@/components/ui/button";
+import { NavbarUser } from "@/components/layout/navbar-user";
 
 export function Navbar() {
   const pathname = usePathname();
