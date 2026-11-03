@@ -1,5 +1,7 @@
 'use client';
 
+// Quarantined: nothing in the app imports this list. User management lives in components/settings.
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

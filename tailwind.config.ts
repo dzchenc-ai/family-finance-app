@@ -18,6 +18,17 @@ const config = {
   		}
   	},
   	extend: {
+  		fontFamily: {
+  			sans: [
+  				"var(--font-sans)",
+  				"PingFang SC",
+  				"Hiragino Sans GB",
+  				"Noto Sans SC",
+  				"Microsoft YaHei",
+  				"sans-serif",
+  			],
+  			display: ["var(--font-display)", "Songti SC", "Noto Serif SC", "serif"],
+  		},
   		colors: {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',

@@ -1,34 +1,24 @@
-'use server';
+"use server";
 
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "./user";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { listSystemSettingsMap, upsertSystemSetting } from "@/lib/domain/system-settings";
 
 export async function getSystemSettings() {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.role !== "ADMIN") {
     throw new Error("Unauthorized");
   }
 
-  const settings = await prisma.systemSetting.findMany();
-  return settings.reduce((acc, setting) => {
-    acc[setting.key] = setting.value;
-    return acc;
-  }, {} as Record<string, string>);
+  return listSystemSettingsMap();
 }
 
 export async function updateSystemSetting(key: string, value: string) {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.role !== "ADMIN") {
     throw new Error("Unauthorized");
   }
 
-  await prisma.systemSetting.upsert({
-    where: { key },
-    update: { value },
-    create: { key, value },
-  });
-
-  revalidatePath('/settings');
+  await upsertSystemSetting(key, value);
+  revalidatePath("/settings");
 }
-

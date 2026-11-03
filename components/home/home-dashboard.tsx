@@ -1,17 +1,7 @@
-'use client';
+"use client";
 
 import Link from "next/link";
-import { 
-  ArrowRight, 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
-  CreditCard, 
-  Activity,
-  Plus,
-  Eye,
-  EyeOff
-} from "lucide-react";
+import { ArrowRight, TrendingUp, TrendingDown, Plus, Eye, EyeOff, PieChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AssetPieChart } from "@/components/home/asset-pie-chart";
@@ -29,226 +19,168 @@ interface HomeDashboardProps {
   chartData: { name: string; value: number }[];
 }
 
+function formatCny(value: number, hidden: boolean) {
+  if (hidden) return "••••••";
+  return `¥${value.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export function HomeDashboard({
   user,
   totalWealth,
   monthlyIncome,
   monthlyExpense,
   transactions,
-  chartData
+  chartData,
 }: HomeDashboardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const now = new Date();
-
-  const formatCurrency = (value: number) => {
-    if (!isVisible) return '******';
-    return `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
-  const formatTransactionAmount = (amount: number, type: string) => {
-    if (!isVisible) return '******';
-    const prefix = type === 'INCOME' ? '+' : '-';
-    return `${prefix}${Math.abs(amount).toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`;
-  };
+  const net = monthlyIncome - monthlyExpense;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* Hero Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <div className="flex items-center gap-4">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
-                欢迎回来，{user.name || '用户'}
-              </h1>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsVisible(!isVisible)}
-                className="rounded-full hover:bg-slate-200 dark:hover:bg-slate-800"
-              >
-                {isVisible ? (
-                  <Eye className="h-5 w-5 text-muted-foreground" />
-                ) : (
-                  <EyeOff className="h-5 w-5 text-muted-foreground" />
-                )}
-              </Button>
+    <main className="page-shell">
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">家庭总览</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+            {user?.name || "你好"}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {format(now, "yyyy年M月d日 EEEE", { locale: zhCN })}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/transactions/create">
+            <Button>
+              <Plus className="h-4 w-4" /> 记一笔
+            </Button>
+          </Link>
+          <Link href="/wealth">
+            <Button variant="outline">查看资产</Button>
+          </Link>
+        </div>
+      </header>
+
+      <section className="mt-8 grid gap-4 lg:grid-cols-12">
+        <div className="flex flex-col justify-between rounded-2xl bg-primary p-6 text-primary-foreground md:p-8 lg:col-span-7">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm text-primary-foreground/70">净资产</p>
+              <p className="money mt-3 text-4xl leading-none md:text-5xl">{formatCny(totalWealth, !isVisible)}</p>
             </div>
-            <p className="text-muted-foreground mt-1">
-              今天是 {format(now, 'yyyy年MM月dd日 EEEE', { locale: zhCN })}
-            </p>
+            <button
+              type="button"
+              onClick={() => setIsVisible(!isVisible)}
+              className="rounded-full p-2 text-primary-foreground/75 transition-colors hover:bg-primary-foreground/10"
+              aria-label={isVisible ? "隐藏金额" : "显示金额"}
+            >
+              {isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            </button>
           </div>
-          <div className="flex gap-3">
-            <Link href="/transactions/create">
-              <Button className="shadow-lg hover:scale-105 transition-transform bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0">
-                <Plus className="mr-2 h-4 w-4" /> 记一笔
-              </Button>
-            </Link>
-            <Link href="/wealth?tab=assets">
-              <Button variant="outline" className="shadow-sm hover:scale-105 transition-transform bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-                <Wallet className="mr-2 h-4 w-4" /> 管理资产
-              </Button>
-            </Link>
+          <div className="mt-8 grid grid-cols-3 gap-4 border-t border-primary-foreground/15 pt-5">
+            <HeroStat label="本月收入" value={formatCny(monthlyIncome, !isVisible)} />
+            <HeroStat label="本月支出" value={formatCny(monthlyExpense, !isVisible)} />
+            <HeroStat label="本月结余" value={formatCny(net, !isVisible)} />
           </div>
         </div>
 
-        {/* Love Quote Card (Mobile Only) */}
-        <div className="md:hidden">
+        <div className="lg:col-span-5">
           <LoveQuoteCard />
         </div>
+      </section>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatsCard 
-            title="总资产" 
-            value={formatCurrency(totalWealth)}
-            icon={<Wallet className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
-            trend="总财富"
-            trendColor="text-blue-600"
-          />
-          <StatsCard 
-            title="本月收入" 
-            value={formatCurrency(monthlyIncome)}
-            icon={<TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />}
-            trend="本月累计"
-            trendColor="text-green-600"
-          />
-          <StatsCard 
-            title="本月支出" 
-            value={formatCurrency(monthlyExpense)}
-            icon={<TrendingDown className="h-5 w-5 text-red-600 dark:text-red-400" />}
-            trend="本月累计"
-            trendColor="text-red-600"
-          />
-        </div>
-
-        {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          
-          {/* Recent Transactions (Left - 8 cols) */}
-          <div className="md:col-span-8 space-y-6">
-            <Card className="border-white/20 dark:border-slate-700/30 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl shadow-xl h-full">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">近期交易</CardTitle>
-                  <CardDescription>最近的收支记录</CardDescription>
-                </div>
-                <Link href="/transactions">
-                  <Button variant="ghost" size="sm" className="gap-1">
-                    查看全部 <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {transactions.length > 0 ? (
-                    transactions.map((tx) => (
-                      <div key={tx.id} className="flex items-center justify-between p-4 rounded-lg bg-white/40 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            tx.type === 'INCOME' 
-                              ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' 
-                              : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                          }`}>
-                            {tx.type === 'INCOME' ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
-                          </div>
-                          <div>
-                            <p className="font-medium">{tx.description || tx.category?.name || '无描述'}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {format(new Date(tx.date), 'MM-dd HH:mm:ss')} · {tx.account.name}
-                            </p>
-                          </div>
-                        </div>
-                        <div className={`font-bold ${
-                          tx.type === 'INCOME' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                        }`}>
-                          {formatTransactionAmount(tx.amount, tx.type)}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-10 text-muted-foreground">
-                      暂无交易记录
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar (Right - 4 cols) */}
-          <div className="md:col-span-4 space-y-6 flex flex-col">
-            
-            {/* Love Quote Card (Desktop Only) */}
-            <div className="hidden md:block">
-              <LoveQuoteCard />
+      <section className="mt-4 grid gap-4 lg:grid-cols-12">
+        <Card className="lg:col-span-7">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle className="text-base font-semibold">最近收支</CardTitle>
+              <CardDescription>最近五笔家庭流水</CardDescription>
             </div>
-
-            {/* Asset Distribution */}
-            <Card className="border-white/20 dark:border-slate-700/30 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl shadow-xl flex-1">
-              <CardHeader>
-                <CardTitle className="text-xl">资产分布</CardTitle>
-                <CardDescription>各类资产占比概览</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {chartData.length > 0 ? (
-                  <div className={!isVisible ? "blur-md select-none transition-all duration-300" : "transition-all duration-300"}>
-                    <AssetPieChart data={chartData} />
-                  </div>
-                ) : (
-                  <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                    暂无资产数据
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions / Budget Preview */}
-            <Card className="border-white/20 dark:border-slate-700/30 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-xl">快捷入口</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                <Link href="/wealth?tab=accounts" className="block">
-                  <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors cursor-pointer text-blue-600 dark:text-blue-400">
-                    <CreditCard className="h-6 w-6 mb-2" />
-                    <span className="text-sm font-medium">账户管理</span>
-                  </div>
+            <Link href="/transactions">
+              <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
+                全部 <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {transactions.length > 0 ? (
+              <ul className="divide-y">
+                {transactions.map((tx) => (
+                  <li key={tx.id} className="flex items-center justify-between gap-4 py-3.5">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                          tx.type === "INCOME" ? "bg-primary/10 text-income" : "bg-destructive/10 text-expense"
+                        }`}
+                      >
+                        {tx.type === "INCOME" ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{tx.description || tx.category?.name || "未填写备注"}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {format(new Date(tx.date), "M月d日 HH:mm")} · {tx.account?.name}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`money shrink-0 text-base ${tx.type === "INCOME" ? "text-income" : "text-expense"}`}>
+                      {isVisible
+                        ? `${tx.type === "INCOME" ? "+" : "−"}${Math.abs(tx.amount).toLocaleString("zh-CN", { minimumFractionDigits: 2 })}`
+                        : "••••"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="flex flex-col items-center py-12 text-center">
+                <p className="text-sm text-muted-foreground">还没有收支记录</p>
+                <Link href="/transactions/create" className="mt-4">
+                  <Button variant="outline" size="sm">记第一笔</Button>
                 </Link>
-                <Link href="/transactions?view=statistics" className="block">
-                  <div className="flex flex-col items-center justify-center p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer text-orange-600 dark:text-orange-400">
-                    <Activity className="h-6 w-6 mb-2" />
-                    <span className="text-sm font-medium">统计报表</span>
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
+        <div className="space-y-4 lg:col-span-5">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-semibold">资产分布</CardTitle>
+              <CardDescription>按账户与资产类型</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {chartData.length > 0 ? (
+                <div className={!isVisible ? "blur-md transition-all" : "transition-all"}>
+                  <AssetPieChart data={chartData} />
+                </div>
+              ) : (
+                <div className="flex h-[220px] flex-col items-center justify-center text-center text-sm text-muted-foreground">
+                  <PieChart className="mb-3 h-5 w-5 opacity-40" />
+                  添加账户或资产后，这里会显示占比
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Link href="/wealth?tab=accounts" className="rounded-xl border bg-card px-4 py-3 text-sm transition-colors hover:bg-accent">
+              <p className="font-medium">资金账户</p>
+              <p className="mt-1 text-xs text-muted-foreground">现金、储蓄与负债</p>
+            </Link>
+            <Link href="/transactions?view=statistics" className="rounded-xl border bg-card px-4 py-3 text-sm transition-colors hover:bg-accent">
+              <p className="font-medium">收支统计</p>
+              <p className="mt-1 text-xs text-muted-foreground">按月查看结余</p>
+            </Link>
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
 
-function StatsCard({ title, value, icon, trend, trendColor }: { title: string, value: string, icon: React.ReactNode, trend: string, trendColor: string }) {
+function HeroStat({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="border-white/20 dark:border-slate-700/30 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl shadow-xl hover:-translate-y-1 transition-transform duration-300">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-        <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-          {icon}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className={`text-xs ${trendColor} mt-1 font-medium flex items-center`}>
-          {trend}
-        </p>
-      </CardContent>
-    </Card>
+    <div>
+      <p className="text-xs text-primary-foreground/65">{label}</p>
+      <p className="money mt-1 text-lg md:text-xl">{value}</p>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
-
+// Manual data dump. Not part of the app runtime.
+// Usage: node scripts/debug-data.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 

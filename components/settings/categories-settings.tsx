@@ -1,13 +1,11 @@
-import { prisma } from "@/lib/prisma";
-import { CreateCategoryDialog } from "@/components/create-category-dialog";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CreateCategoryDialog } from "@/components/categories/create-category-dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { deleteCategory } from "@/app/actions/category";
 import { Trash2 } from "lucide-react";
+import { listCategoriesNewestFirst } from "@/lib/domain/categories";
 
 export async function CategoriesSettings() {
-  const categories = await prisma.category.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
+  const categories = await listCategoriesNewestFirst();
 
   const expenseCategories = categories.filter(c => c.type === 'EXPENSE');
   const incomeCategories = categories.filter(c => c.type === 'INCOME');

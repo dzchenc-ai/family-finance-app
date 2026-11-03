@@ -1,12 +1,10 @@
-'use client';
+"use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountList } from "@/components/wealth/account-list";
 import { AssetList } from "@/components/wealth/asset-list";
-import { Button } from "@/components/ui/button";
 
 interface WealthDashboardProps {
   totalWealth: number;
@@ -19,6 +17,11 @@ interface WealthDashboardProps {
   defaultTab: string;
 }
 
+function formatCny(value: number, hidden: boolean) {
+  if (hidden) return "••••••";
+  return `¥${value.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export function WealthDashboard({
   totalWealth,
   totalAccountBalance,
@@ -27,60 +30,44 @@ export function WealthDashboard({
   assets,
   assetTypes,
   users,
-  defaultTab
+  defaultTab,
 }: WealthDashboardProps) {
   const [isVisible, setIsVisible] = useState(false);
 
-  const formatCurrency = (value: number) => {
-    if (!isVisible) return '******';
-    return `¥${value.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`;
-  };
-
   return (
-    <div className="max-w-7xl mx-auto p-8 space-y-8">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold tracking-tight">我的财富</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsVisible(!isVisible)}
-            className="rounded-full hover:bg-slate-200 dark:hover:bg-slate-800"
-          >
-            {isVisible ? (
-              <Eye className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <EyeOff className="h-5 w-5 text-muted-foreground" />
-            )}
-          </Button>
+    <div className="page-shell space-y-8">
+      <header className="flex items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">资产负债表</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">家庭资产</h1>
         </div>
-        
-        <Card className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 shadow-lg">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-medium text-white/80 flex items-center gap-2">
-              <Wallet className="h-5 w-5" /> 总资产净值
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold font-mono">
-              {formatCurrency(totalWealth)}
-            </div>
-            <div className="mt-4 flex gap-8 text-sm">
-              <div>
-                <div className="text-white/60">资金账户</div>
-                <div className="font-mono text-lg">{formatCurrency(totalAccountBalance)}</div>
-              </div>
-              <div>
-                <div className="text-white/60">投资资产</div>
-                <div className="font-mono text-lg">{formatCurrency(totalAssetValue)}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <button
+          type="button"
+          onClick={() => setIsVisible(!isVisible)}
+          className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
+          {isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          {isVisible ? "隐藏金额" : "显示金额"}
+        </button>
+      </header>
+
+      <section className="rounded-2xl border bg-card p-6 md:p-8">
+        <p className="text-sm text-muted-foreground">净资产</p>
+        <p className="money mt-2 text-4xl md:text-5xl">{formatCny(totalWealth, !isVisible)}</p>
+        <div className="mt-6 grid gap-4 border-t pt-5 sm:grid-cols-2">
+          <div>
+            <p className="text-xs text-muted-foreground">资金账户</p>
+            <p className="money mt-1 text-xl">{formatCny(totalAccountBalance, !isVisible)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">投资资产</p>
+            <p className="money mt-1 text-xl">{formatCny(totalAssetValue, !isVisible)}</p>
+          </div>
+        </div>
+      </section>
 
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+        <TabsList>
           <TabsTrigger value="accounts">资金账户</TabsTrigger>
           <TabsTrigger value="assets">投资资产</TabsTrigger>
         </TabsList>

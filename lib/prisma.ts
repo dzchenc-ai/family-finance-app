@@ -1,3 +1,4 @@
+/** Process-wide Prisma client. Domain code should import this instead of constructing its own. */
 import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }

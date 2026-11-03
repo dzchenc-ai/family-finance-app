@@ -63,7 +63,7 @@ export function TransactionFilters({ categories, accounts }: TransactionFiltersP
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="pl-9 bg-white dark:bg-zinc-900"
+            className="h-10 bg-card pl-9"
           />
         </div>
         <Button 
@@ -80,7 +80,7 @@ export function TransactionFilters({ categories, accounts }: TransactionFiltersP
       </div>
 
       {showFilters && (
-        <Card className="p-4 bg-muted/30 border-dashed">
+        <Card className="bg-muted/40 p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">收支类型</Label>
