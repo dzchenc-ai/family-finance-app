@@ -1,28 +1,33 @@
-import { LoginForm } from '@/components/auth/login-form';
+import { LoginForm } from "@/components/auth/login-form";
 
 export default function LoginPage() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 overflow-hidden bg-slate-50 dark:bg-slate-950">
-      {/* Background Effects */}
-      <div className="absolute inset-0 w-full h-full">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-400/20 blur-[100px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 blur-[100px] animate-pulse delay-1000" />
-        <div className="absolute top-[40%] left-[40%] w-[20%] h-[20%] rounded-full bg-cyan-400/20 blur-[80px] animate-pulse delay-700" />
-      </div>
+    <main className="grid min-h-screen lg:grid-cols-2">
+      <section className="hidden flex-col justify-between bg-primary px-12 py-12 text-primary-foreground lg:flex">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-foreground/15 font-display text-lg">
+            家
+          </span>
+          <span className="text-sm font-medium tracking-wide">家庭理财</span>
+        </div>
+        <div className="max-w-md">
+          <p className="font-display text-4xl leading-tight">把家里的钱，看清楚。</p>
+          <p className="mt-4 text-sm leading-relaxed text-primary-foreground/75">
+            账户、投资和日常收支放在一处。金额默认隐藏，只在你需要时展开。
+          </p>
+        </div>
+        <p className="text-xs text-primary-foreground/55">私人账本 · 家庭共用</p>
+      </section>
 
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
-
-      <div className="relative w-full max-w-md z-10">
-        <LoginForm />
-        
-        <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-          还没有账号？{' '}
-          <a href="/register" className="font-medium text-blue-600 hover:text-blue-500 hover:underline transition-all">
-            立即注册
-          </a>
-        </p>
-      </div>
+      <section className="flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-sm">
+          <div className="mb-8 lg:hidden">
+            <p className="font-display text-2xl">家庭理财</p>
+            <p className="mt-1 text-sm text-muted-foreground">登录后继续查看家庭账本</p>
+          </div>
+          <LoginForm />
+        </div>
+      </section>
     </main>
   );
 }

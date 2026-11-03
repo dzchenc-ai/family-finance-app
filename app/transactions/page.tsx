@@ -38,16 +38,17 @@ export default async function TransactionsPage({
   } = data;
 
   return (
-    <div className="max-w-7xl mx-auto p-8 space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="page-shell space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">交易记录</h1>
-          <p className="text-muted-foreground mt-1">查看及管理您的所有收支明细</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">流水</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">家庭账本</h1>
+          <p className="mt-1 text-sm text-muted-foreground">收入、支出和转账都记在这里</p>
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex gap-2">
           <ExportButton />
           <Link href="/transactions/create">
-            <Button className="gap-2 shadow-md w-full md:w-auto">
+            <Button>
               <Plus className="h-4 w-4" /> 记一笔
             </Button>
           </Link>
@@ -61,47 +62,34 @@ export default async function TransactionsPage({
         </TabsList>
 
         <TabsContent value="list" className="space-y-8">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/10 border-red-200 dark:border-red-900/50">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium text-red-600 dark:text-red-400">本月支出</p>
-                    <h3 className="text-2xl font-bold mt-2 text-red-700 dark:text-red-300">
-                      ¥ {currentExpense.toLocaleString("zh-CN", { minimumFractionDigits: 2 })}
-                    </h3>
-                  </div>
-                  <div className={`flex items-center text-sm font-medium ${expenseGrowth > 0 ? "text-red-600" : "text-green-600"} bg-white/50 dark:bg-black/20 px-2 py-1 rounded-full`}>
-                    {expenseGrowth > 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
-                    {Math.abs(expenseGrowth).toFixed(1)}%
-                    <span className="text-xs text-muted-foreground ml-1">环比</span>
-                  </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Card>
+              <CardContent className="flex items-start justify-between p-5">
+                <div>
+                  <p className="text-xs text-muted-foreground">本月支出</p>
+                  <p className="money mt-2 text-3xl text-expense">
+                    ¥{currentExpense.toLocaleString("zh-CN", { minimumFractionDigits: 2 })}
+                  </p>
                 </div>
+                <GrowthChip value={expenseGrowth} upIsExpense />
               </CardContent>
             </Card>
-
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/10 border-green-200 dark:border-green-900/50">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium text-green-600 dark:text-green-400">本月收入</p>
-                    <h3 className="text-2xl font-bold mt-2 text-green-700 dark:text-green-300">
-                      ¥ {currentIncome.toLocaleString("zh-CN", { minimumFractionDigits: 2 })}
-                    </h3>
-                  </div>
-                  <div className={`flex items-center text-sm font-medium ${incomeGrowth > 0 ? "text-green-600" : "text-red-600"} bg-white/50 dark:bg-black/20 px-2 py-1 rounded-full`}>
-                    {incomeGrowth > 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
-                    {Math.abs(incomeGrowth).toFixed(1)}%
-                    <span className="text-xs text-muted-foreground ml-1">环比</span>
-                  </div>
+            <Card>
+              <CardContent className="flex items-start justify-between p-5">
+                <div>
+                  <p className="text-xs text-muted-foreground">本月收入</p>
+                  <p className="money mt-2 text-3xl text-income">
+                    ¥{currentIncome.toLocaleString("zh-CN", { minimumFractionDigits: 2 })}
+                  </p>
                 </div>
+                <GrowthChip value={incomeGrowth} />
               </CardContent>
             </Card>
           </div>
 
           <TransactionFilters categories={categories} accounts={accounts} />
 
-          <Card className="shadow-sm border-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm">
+          <Card>
             <TransactionList
               transactions={transactions}
               page={page}
@@ -117,5 +105,17 @@ export default async function TransactionsPage({
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function GrowthChip({ value, upIsExpense = false }: { value: number; upIsExpense?: boolean }) {
+  const up = value > 0;
+  const tone = up === upIsExpense ? "text-expense" : "text-income";
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-xs ${tone}`}>
+      {up ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
+      {Math.abs(value).toFixed(1)}%
+      <span className="text-muted-foreground">环比</span>
+    </span>
   );
 }

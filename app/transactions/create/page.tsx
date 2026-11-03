@@ -26,10 +26,10 @@ export default async function CreateTransactionPage() {
     console.log(`Found ${categories.length} categories and ${accounts.length} accounts`);
 
     return (
-      <div className="flex justify-center p-8">
+      <div className="page-shell flex justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>记一笔</CardTitle>
+            <CardTitle className="text-lg">记一笔</CardTitle>
           </CardHeader>
           <CardContent>
             <TransactionForm action={createTransaction} categories={categories} accounts={accounts} />

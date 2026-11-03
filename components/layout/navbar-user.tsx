@@ -52,9 +52,9 @@ export function NavbarUser() {
                 {user.email}
                 </span>
             </div>
-            <Avatar className="h-9 w-9 border transition-all group-hover:ring-2 group-hover:ring-primary/20">
+            <Avatar className="h-8 w-8 border">
                 <AvatarImage src={user.image || ""} />
-                <AvatarFallback className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold">
+                <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
                     {user.name?.[0]?.toUpperCase() || <Users className="h-4 w-4" />}
                 </AvatarFallback>
             </Avatar>

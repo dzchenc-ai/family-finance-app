@@ -12,10 +12,10 @@ export default async function CreateAccountPage({
   const parentId = typeof searchParams.parentId === "string" ? searchParams.parentId : undefined;
 
   return (
-    <div className="flex justify-center p-8">
+    <div className="page-shell flex justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>添加账户</CardTitle>
+          <CardTitle className="text-lg">添加账户</CardTitle>
         </CardHeader>
         <CardContent>
           <AccountForm

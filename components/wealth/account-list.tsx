@@ -34,12 +34,12 @@ export function AccountList({ accounts, users = [], isVisible = true }: AccountL
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">账户列表</h2>
-          <p className="text-muted-foreground mt-1">管理您的所有资金账户及余额</p>
+          <h2 className="text-lg font-semibold tracking-tight">资金账户</h2>
+          <p className="mt-1 text-sm text-muted-foreground">现金、储蓄、银行卡和负债</p>
         </div>
-        <div className="flex gap-4 w-full md:w-auto">
+        <div className="flex w-full gap-3 md:w-auto">
           {users.length > 0 && (
             <Select value={selectedUserId} onValueChange={setSelectedUserId}>
               <SelectTrigger className="w-[180px]">
@@ -56,7 +56,7 @@ export function AccountList({ accounts, users = [], isVisible = true }: AccountL
             </Select>
           )}
           <Link href="/accounts/create">
-            <Button className="gap-2 shadow-lg">
+            <Button>
               <Plus className="h-4 w-4" /> 添加账户
             </Button>
           </Link>
@@ -64,14 +64,17 @@ export function AccountList({ accounts, users = [], isVisible = true }: AccountL
       </div>
       
       {filteredAccounts.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-             <CreditCard className="h-12 w-12 mb-4 opacity-20" />
-             <p>暂无账户，请添加您的第一个账户。</p>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-14 text-center">
+             <CreditCard className="mb-3 h-5 w-5 text-muted-foreground" />
+             <p className="text-sm text-muted-foreground">还没有资金账户</p>
+             <Link href="/accounts/create" className="mt-4">
+               <Button variant="outline" size="sm">添加第一个账户</Button>
+             </Link>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           {filteredAccounts.map((account) => (
             <AccountCard 
               key={account.id} 

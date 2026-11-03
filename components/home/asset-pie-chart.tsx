@@ -1,68 +1,54 @@
-'use client';
+"use client";
 
-import React from 'react';
-import ReactECharts from 'echarts-for-react';
-import { useTheme } from 'next-themes';
+import React from "react";
+import ReactECharts from "echarts-for-react";
 
 interface AssetPieChartProps {
   data: { name: string; value: number }[];
 }
 
-export function AssetPieChart({ data }: AssetPieChartProps) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+const PALETTE = ["#1f5c4a", "#c4a574", "#3e5160", "#b56b52", "#7f8f86", "#d8c7a4", "#6d7d55"];
 
+export function AssetPieChart({ data }: AssetPieChartProps) {
   const option = {
+    color: PALETTE,
     tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} ({d}%)',
-      backgroundColor: isDark ? '#1f2937' : '#ffffff',
-      borderColor: isDark ? '#374151' : '#e5e7eb',
-      textStyle: {
-        color: isDark ? '#f3f4f6' : '#1f2937',
-      },
+      trigger: "item",
+      formatter: "{b}<br/>¥{c} · {d}%",
+      backgroundColor: "#fbfaf7",
+      borderColor: "#e6e1d8",
+      textStyle: { color: "#1c2b26", fontSize: 12 },
     },
     legend: {
-      bottom: '0%',
-      left: 'center',
-      textStyle: {
-        color: isDark ? '#9ca3af' : '#4b5563',
-      },
+      bottom: 0,
+      left: "center",
+      icon: "circle",
+      itemWidth: 8,
+      itemHeight: 8,
+      textStyle: { color: "#5c675f", fontSize: 12 },
     },
     series: [
       {
-        name: '资产分布',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        avoidLabelOverlap: false,
+        name: "资产分布",
+        type: "pie",
+        radius: ["52%", "74%"],
+        center: ["50%", "44%"],
+        avoidLabelOverlap: true,
         itemStyle: {
-          borderRadius: 10,
-          borderColor: isDark ? '#020617' : '#fff',
+          borderRadius: 4,
+          borderColor: "#fbfaf7",
           borderWidth: 2,
         },
-        label: {
-          show: false,
-          position: 'center',
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: 16,
-            fontWeight: 'bold',
-            color: isDark ? '#fff' : '#000',
-          },
-        },
-        labelLine: {
-          show: false,
-        },
-        data: data,
+        label: { show: false },
+        labelLine: { show: false },
+        data,
       },
     ],
   };
 
   return (
-    <div className="w-full h-[300px]">
-      <ReactECharts option={option} style={{ height: '100%', width: '100%' }} theme={isDark ? 'dark' : undefined} />
+    <div className="h-[240px] w-full">
+      <ReactECharts option={option} style={{ height: "100%", width: "100%" }} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { Plus, TrendingUp, TrendingDown, DollarSign, Layers, Edit, User } from "lucide-react";
+import { Plus, Edit, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshAssetButton } from "./refresh-asset-button";
@@ -48,12 +48,12 @@ export function AssetList({ assets, assetTypes = [], users = [], isVisible = tru
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">投资资产</h2>
-          <p className="text-muted-foreground mt-1">实时追踪您的投资组合表现</p>
+          <h2 className="text-lg font-semibold tracking-tight">投资组合</h2>
+          <p className="mt-1 text-sm text-muted-foreground">持仓、市值与浮动盈亏</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {users.length > 0 && (
             <Select value={selectedUserId} onValueChange={setSelectedUserId}>
               <SelectTrigger className="w-[180px]">
@@ -71,7 +71,7 @@ export function AssetList({ assets, assetTypes = [], users = [], isVisible = tru
           )}
           <RefreshAssetButton />
           <Link href="/assets/create">
-            <Button className="gap-2 shadow-md">
+            <Button>
               <Plus className="h-4 w-4" /> 添加资产
             </Button>
           </Link>
@@ -79,62 +79,53 @@ export function AssetList({ assets, assetTypes = [], users = [], isVisible = tru
       </div>
 
       {/* 核心指标卡片 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-blue-500 shadow-sm">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4" /> 总资产 (市值)
-            </CardTitle>
+            <CardTitle className="text-xs font-medium text-muted-foreground">市值</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">¥{formatCurrency(totalMarketValue)}</div>
+            <div className="money text-2xl">¥{formatCurrency(totalMarketValue)}</div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-gray-500 shadow-sm">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Layers className="h-4 w-4" /> 总投入成本
-            </CardTitle>
+            <CardTitle className="text-xs font-medium text-muted-foreground">成本</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">¥{formatCurrency(totalCost)}</div>
+            <div className="money text-2xl">¥{formatCurrency(totalCost)}</div>
           </CardContent>
         </Card>
-        <Card className={`border-l-4 shadow-sm ${totalProfit >= 0 ? 'border-l-red-500' : 'border-l-green-500'}`}>
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              {totalProfit >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />} 
-              浮动盈亏
-            </CardTitle>
+            <CardTitle className="text-xs font-medium text-muted-foreground">浮动盈亏</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {totalProfit >= 0 ? '+' : ''}{formatCurrency(totalProfit)}
+            <div className={`money text-2xl ${totalProfit >= 0 ? "text-market-up" : "text-market-down"}`}>
+              {totalProfit >= 0 ? "+" : ""}{formatCurrency(totalProfit)}
             </div>
           </CardContent>
         </Card>
-        <Card className={`border-l-4 shadow-sm ${profitRate >= 0 ? 'border-l-red-500' : 'border-l-green-500'}`}>
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-               收益率
-            </CardTitle>
+            <CardTitle className="text-xs font-medium text-muted-foreground">收益率</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${profitRate >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {profitRate >= 0 ? '+' : ''}{formatPercent(profitRate)}
+            <div className={`money text-2xl ${profitRate >= 0 ? "text-market-up" : "text-market-down"}`}>
+              {profitRate >= 0 ? "+" : ""}{formatPercent(profitRate)}
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* 资产列表 */}
-      <Card className="shadow-sm border-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm">
+      <Card>
         <div className="overflow-x-auto">
           {filteredAssets.length === 0 ? (
-             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-               <p>暂无资产数据</p>
-               <Link href="/assets/create" className="mt-4 text-primary hover:underline">
-                 添加您的第一项资产
+             <div className="flex flex-col items-center justify-center py-16 text-center">
+               <p className="text-sm text-muted-foreground">还没有投资持仓</p>
+               <Link href="/assets/create" className="mt-4">
+                 <Button variant="outline" size="sm">添加第一项资产</Button>
                </Link>
              </div>
           ) : (
@@ -144,7 +135,7 @@ export function AssetList({ assets, assetTypes = [], users = [], isVisible = tru
                   <th className="h-12 px-4 font-medium text-muted-foreground">资产名称</th>
                   <th className="h-12 px-4 font-medium text-muted-foreground">类型</th>
                   <th className="h-12 px-4 font-medium text-muted-foreground text-right">持仓</th>
-                  <th className="h-12 px-4 font-medium text-muted-foreground text-right">成本/现价</th>
+                  <th className="h-12 px-4 font-medium text-muted-foreground text-right">成本 / 现价</th>
                   <th className="h-12 px-4 font-medium text-muted-foreground text-right">市值</th>
                   <th className="h-12 px-4 font-medium text-muted-foreground text-right">盈亏</th>
                   <th className="h-12 px-4 font-medium text-muted-foreground text-right">操作</th>
@@ -184,16 +175,16 @@ export function AssetList({ assets, assetTypes = [], users = [], isVisible = tru
                         </span>
                       </td>
                       <td className="p-4 text-right font-mono">{asset.quantity}</td>
-                      <td className="p-4 text-right font-mono text-xs text-muted-foreground">
-                        <div>C: ¥{formatCurrency(asset.costPrice)}</div>
-                        <div>M: ¥{formatCurrency(marketPrice)}</div>
+                      <td className="p-4 text-right text-xs text-muted-foreground">
+                        <div className="money">¥{formatCurrency(asset.costPrice)}</div>
+                        <div className="money">¥{formatCurrency(marketPrice)}</div>
                       </td>
-                      <td className="p-4 text-right font-bold font-mono">¥{formatCurrency(marketValue)}</td>
+                      <td className="money p-4 text-right">¥{formatCurrency(marketValue)}</td>
                       <td className="p-4 text-right">
-                        <div className={`font-medium ${profit >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {profit >= 0 ? '+' : ''}{formatCurrency(profit)}
+                        <div className={`money ${profit >= 0 ? "text-market-up" : "text-market-down"}`}>
+                          {profit >= 0 ? "+" : ""}{formatCurrency(profit)}
                         </div>
-                        <div className={`text-xs ${profit >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        <div className={`text-xs ${profit >= 0 ? "text-market-up" : "text-market-down"}`}>
                           {formatPercent(profitPercent)}
                         </div>
                       </td>

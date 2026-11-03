@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 export function AiChatWidget() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: '你好！我是你的家庭理财助手。我可以帮你分析财务状况、总结花销，或者回答关于理财的问题。' }
@@ -121,13 +123,17 @@ export function AiChatWidget() {
     toast.success("已开启新对话");
   }
 
+  if (pathname.startsWith("/login")) {
+    return null;
+  }
+
   return (
     <>
       {/* 悬浮按钮 */}
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white p-0 z-50 transition-transform hover:scale-105"
+          className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-primary p-0 text-primary-foreground shadow-md hover:bg-primary/90"
         >
           <Bot className="h-8 w-8" />
         </Button>
@@ -136,8 +142,8 @@ export function AiChatWidget() {
       {/* 聊天窗口 */}
       {isOpen && (
         <div className="fixed bottom-6 right-6 w-[90vw] md:w-[400px] h-[600px] max-h-[80vh] z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
-          <Card className="h-full flex flex-col shadow-2xl border-slate-200 dark:border-slate-800 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 flex flex-row items-center justify-between shrink-0">
+          <Card className="flex h-full flex-col overflow-hidden shadow-xl">
+            <CardHeader className="flex shrink-0 flex-row items-center justify-between border-b bg-card p-4">
               <div className="flex items-center gap-2">
                 <Bot className="h-6 w-6" />
                 <CardTitle className="text-lg">理财助手</CardTitle>
@@ -147,7 +153,7 @@ export function AiChatWidget() {
                   variant="ghost" 
                   size="icon" 
                   onClick={handleNewChat}
-                  className="text-white hover:bg-white/20 h-8 w-8"
+                  className="h-8 w-8 text-muted-foreground"
                   title="新建对话"
                 >
                   <Plus className="h-5 w-5" />
@@ -156,14 +162,14 @@ export function AiChatWidget() {
                   variant="ghost" 
                   size="icon" 
                   onClick={() => setIsOpen(false)}
-                  className="text-white hover:bg-white/20 h-8 w-8"
+                  className="h-8 w-8 text-muted-foreground"
                 >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
             </CardHeader>
             
-            <CardContent className="flex-1 p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col">
+            <CardContent className="flex flex-1 flex-col overflow-hidden bg-muted/30 p-0">
               <div 
                 ref={scrollRef}
                 className="flex-1 overflow-y-auto p-4 space-y-4"
@@ -180,8 +186,8 @@ export function AiChatWidget() {
                       className={cn(
                         "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-sm",
                         msg.role === 'user'
-                          ? "bg-blue-600 text-white rounded-br-none"
-                          : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none border border-slate-200 dark:border-slate-700"
+                          ? "rounded-br-none bg-primary text-primary-foreground"
+                          : "rounded-bl-none border bg-background text-foreground"
                       )}
                     >
                       {msg.role === 'assistant' && (
@@ -243,7 +249,7 @@ export function AiChatWidget() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="输入您的问题..."
-                  className="flex-1 focus-visible:ring-purple-500"
+                  className="flex-1"
                   disabled={isLoading}
                 />
                 <Button 
@@ -251,12 +257,7 @@ export function AiChatWidget() {
                   size="icon" 
                   onClick={isLoading ? handleStop : () => handleSend()}
                   disabled={!isLoading && !input.trim()}
-                  className={cn(
-                    "shrink-0 text-white transition-colors",
-                    isLoading 
-                      ? "bg-red-500 hover:bg-red-600" 
-                      : "bg-blue-600 hover:bg-blue-700"
-                  )}
+                  className={cn(isLoading && "bg-destructive text-destructive-foreground hover:bg-destructive/90")}
                 >
                   {isLoading ? <Square className="h-4 w-4 fill-current" /> : <Send className="h-4 w-4" />}
                 </Button>
